@@ -1,4 +1,4 @@
-# cleric
+# Cleric
 
 Install or remove Baldurs Gate 3 Mods.
 
