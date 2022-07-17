@@ -5,6 +5,10 @@
 
 (defonce color-background (Color. 166 42 42))
 
+(def state (atom {:mod-path ""
+                  :bg3-path ""
+                  :mods []}))
+
 (defn screen-mod-installer
   [widgets prev prev-prev]
   (-> widgets
@@ -30,8 +34,8 @@
       (gui/add-label "label-hint" "This is the location where you downloaded/collect
                                    all your mod zip files"
                      {:x 150 :y 220 :color [Color/black] :font-size 18 :group "mod-home"})
-      (gui/add-input "input-path" "" {:x 150 :y 280 :width 600 :color [(Color. 166 100 100) Color/black] :group "mod-home"})
-      (gui/add-button "select-path" "" {:x 760 :y 280 :width 50 :color [(Color. 166 100 100) Color/black] :group "mod-home"})
+      (gui/add-input "input-path" (:mod-path @state) {:x 150 :y 280 :width 600 :color [(Color. 166 100 100) Color/black] :group "mod-home"})
+      (gui/add-button "select-path" "..." {:x 760 :y 280 :width 50 :color [(Color. 166 100 100) Color/black] :group "mod-home"})
       (gui/add-button "previous" "<" {:x 10 :y 35 :width 50 :height 500 :has-border? false :can-focus? false :color [(Color. 166 100 100 70) Color/black] :group "mod-home"})
       (gui/add-button "next" ">" {:x 940 :y 35 :width 50 :height 500 :has-border? false :can-focus? false :color [(Color. 166 100 100 70) Color/black] :group "mod-home"})
       (gui/attach-event "previous" :mouse-clicked (fn [wdgs _]
@@ -39,6 +43,7 @@
                                                         (gui/remove-widget-group "mod-home")
                                                         prev)))
       (gui/attach-event "next" :mouse-clicked (fn [wdgs _]
+                                                (swap! state assoc :mod-path (:value (get wdgs "input-path")))
                                                 (-> wdgs
                                                     (gui/remove-widget-group "mod-home")
                                                     (screen-mod-installer screen-select-mod-folder prev))))))
@@ -48,13 +53,15 @@
   (-> widgets
       (gui/add-label "label-title" "Select the Baldurs Gate 3 Home folder"
                      {:x 150 :y 180 :color [Color/black] :font-size 28 :group "bg3-home"})
-      (gui/add-label "label-hint" "(Linux: ...\\Larian Studio\\Baldurgs Gate 3
-                                    Windows: Documents\\Larian Studio\\Baldurgs Gate 3)"
+      (gui/add-label "label-hint" "(Linux: ...\\Larian Studio\\Baldur's Gate 3
+                                    Windows: Documents\\Larian Studio\\Baldur's Gate 3
+                                   or C:\\Users\\<YourUserName>\\AppData\\Local\\Larian Studios\\Baldur's Gate 3)"
                      {:x 150 :y 220 :color [Color/black] :font-size 18 :group "bg3-home"})
-      (gui/add-input "input-path" "" {:x 150 :y 280 :width 600 :color [(Color. 166 100 100) Color/black] :group "bg3-home"})
-      (gui/add-button "select-path" "" {:x 760 :y 280 :width 50 :color [(Color. 166 100 100) Color/black] :group "bg3-home"})
+      (gui/add-input "input-path" (:bg3-path @state) {:x 150 :y 280 :width 600 :color [(Color. 166 100 100) Color/black] :group "bg3-home"})
+      (gui/add-button "select-path" "..." {:x 760 :y 280 :width 50 :color [(Color. 166 100 100) Color/black] :group "bg3-home"})
       (gui/add-button "next" ">" {:x 940 :y 35 :width 50 :height 500 :has-border? false :can-focus? false :color [(Color. 166 100 100 70) Color/black] :group "bg3-home"})
       (gui/attach-event "next" :mouse-clicked (fn [wdgs _]
+                                                (swap! state assoc :bg3-path (:value (get wdgs "input-path")))
                                                 (-> wdgs
                                                     (gui/remove-widget-group "bg3-home")
                                                     (screen-select-mod-folder screen-select-bg3-home))))))
