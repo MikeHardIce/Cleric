@@ -1,6 +1,8 @@
 (ns cleric.core
-  (:require [strigui.core :as gui])
-  (:import [java.awt Color])
+  (:require [strigui.core :as gui]
+            [strigui.widget :as w])
+  (:import [java.awt Color]
+           [javax.swing JFileChooser])
   (:gen-class))
 
 (defonce color-background (Color. 166 42 42))
@@ -8,6 +10,16 @@
 (def state (atom {:mod-path ""
                   :bg3-path ""
                   :mods []}))
+
+(defn directory-dialog! 
+  [title]
+  (let [dialog (doto (JFileChooser.)
+                 (.setDialogTitle title)
+                 (.setFileSelectionMode JFileChooser/DIRECTORIES_ONLY))
+        result (.showOpenDialog dialog (-> @w/state :context :window))]
+    (if (= result JFileChooser/APPROVE_OPTION)
+      (.getAbsolutePath (.getSelectedFile dialog))
+      "")))
 
 (defn screen-mod-installer
   [widgets prev prev-prev]
@@ -46,7 +58,10 @@
                                                 (swap! state assoc :mod-path (:value (get wdgs "input-path")))
                                                 (-> wdgs
                                                     (gui/remove-widget-group "mod-home")
-                                                    (screen-mod-installer screen-select-mod-folder prev))))))
+                                                    (screen-mod-installer screen-select-mod-folder prev))))
+      (gui/attach-event "select-path" :mouse-clicked (fn [wdgs _]
+                                                       (let [dir (directory-dialog! "Select Mod Directory")]
+                                                         (assoc-in wdgs ["input-path" :value] dir))))))
 
 (defn screen-select-bg3-home
   [widgets]
@@ -64,7 +79,10 @@
                                                 (swap! state assoc :bg3-path (:value (get wdgs "input-path")))
                                                 (-> wdgs
                                                     (gui/remove-widget-group "bg3-home")
-                                                    (screen-select-mod-folder screen-select-bg3-home))))))
+                                                    (screen-select-mod-folder screen-select-bg3-home))))
+      (gui/attach-event "select-path" :mouse-clicked (fn [wdgs _]
+                                                       (let [dir (directory-dialog! "Select BG3 Home Directory")]
+                                                         (assoc-in wdgs ["input-path" :value] dir))))))
 
 (defn -main
   [& args]
